@@ -19,7 +19,11 @@ declare(strict_types=1);
 
 namespace Picpay\LaravelAspect;
 
+use Illuminate\Log\Events\MessageLogged;
 use Illuminate\Support\ServiceProvider;
+use Jaeger\Config;
+use OpenTracing\GlobalTracer;
+use OpenTracing\Tracer;
 
 /**
  * Class AspectServiceProvider
@@ -35,6 +39,22 @@ class AspectServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->app['aspect.manager']->weave();
+
+        if ($this->app['config']['tracing.errors']) {
+            $this->app['events']->listen(MessageLogged::class, function (MessageLogged $event) {
+                if ($event->level == 'error') {
+                    optional(GlobalTracer::get()->getActiveSpan())->setTag('error', 'true');
+                    optional(GlobalTracer::get()->getActiveSpan())->tag('error_message', $event->message);
+                }
+            });
+        }
+
+        if (method_exists($this->app, 'terminating')) {
+            $this->app->terminating(function () {
+                optional(GlobalTracer::get()->getActiveSpan())->finish();
+                GlobalTracer::get()->flush();
+            });
+        }
     }
 
     /**
@@ -63,6 +83,18 @@ class AspectServiceProvider extends ServiceProvider
 
             // register annotation
             return new AspectManager($app);
+        });
+        $this->app->singleton(Config::class, function ($app) {
+            $config = new Config(
+                $app['config']->get('picpay-laravel-aop.tracing'),
+                env('APP_NAME', 'app-name'),
+            );
+            $config->initializeTracer();
+            return $config;
+        });
+        $this->app->singleton(Tracer::class, function ($app) {
+            $app->make(Config::class);
+            return GlobalTracer::get();
         });
     }
 
