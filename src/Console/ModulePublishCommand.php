@@ -45,19 +45,19 @@ class ModulePublishCommand extends Command
 
     /** @var string */
     protected $classPath = 'Modules';
-
     /** @var array  package modules */
     protected $modules = [
-        'CacheableModule'      => 'Picpay\LaravelAspect\Modules\CacheableModule',
-        'CacheEvictModule'     => 'Picpay\LaravelAspect\Modules\CacheEvictModule',
-        'CachePutModule'       => 'Picpay\LaravelAspect\Modules\CachePutModule',
-        'TransactionalModule'  => 'Picpay\LaravelAspect\Modules\TransactionalModule',
-        'LoggableModule'       => 'Picpay\LaravelAspect\Modules\LoggableModule',
-        'LogExceptionsModule'  => 'Picpay\LaravelAspect\Modules\LogExceptionsModule',
-        'PostConstructModule'  => 'Picpay\LaravelAspect\Modules\PostConstructModule',
-        'RetryOnFailureModule' => 'Picpay\LaravelAspect\Modules\RetryOnFailureModule',
-        'MessageDrivenModule'  => 'Picpay\LaravelAspect\Modules\MessageDrivenModule',
-        'QueryLogModule'       => 'Picpay\LaravelAspect\Modules\QueryLogModule',
+//        'CacheableModule'      => 'Picpay\LaravelAspect\Modules\CacheableModule',
+//        'CacheEvictModule'     => 'Picpay\LaravelAspect\Modules\CacheEvictModule',
+//        'CachePutModule'       => 'Picpay\LaravelAspect\Modules\CachePutModule',
+//        'TransactionalModule'  => 'Picpay\LaravelAspect\Modules\TransactionalModule',
+//        'LoggableModule'       => 'Picpay\LaravelAspect\Modules\LoggableModule',
+//        'LogExceptionsModule'  => 'Picpay\LaravelAspect\Modules\LogExceptionsModule',
+//        'PostConstructModule'  => 'Picpay\LaravelAspect\Modules\PostConstructModule',
+//        'RetryOnFailureModule' => 'Picpay\LaravelAspect\Modules\RetryOnFailureModule',
+//        'MessageDrivenModule'  => 'Picpay\LaravelAspect\Modules\MessageDrivenModule',
+//        'QueryLogModule'       => 'Picpay\LaravelAspect\Modules\QueryLogModule',
+        'TraceModule'       => 'Picpay\LaravelAspect\Modules\TraceModule',
     ];
 
     /**
