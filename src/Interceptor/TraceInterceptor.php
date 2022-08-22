@@ -2,8 +2,8 @@
 
 namespace Picpay\LaravelAspect\Interceptor;
 
-use OpenTracing\GlobalTracer;
 use Picpay\LaravelAspect\Annotation\AnnotationReaderTrait;
+use Picpay\LaravelAspect\Jaeger;
 use Ray\Aop\MethodInterceptor;
 use Ray\Aop\MethodInvocation;
 
@@ -14,34 +14,34 @@ class TraceInterceptor extends AbstractLogger implements MethodInterceptor
 
     public function invoke(MethodInvocation $invocation)
     {
-        $span = GlobalTracer::get()->startActiveSpan($invocation->getMethod()->getName(), [
-            'child_of' => GlobalTracer::get()->getActiveSpan(),
-        ]);
-
-        $span->getSpan()->setTag('method', $invocation->getMethod()->getName());
-        $span->getSpan()->log(['method' => $invocation->getMethod()->getName()]);
+        /** @var Jaeger $trace */
+        $trace = app(Jaeger::class);
+        $span = $trace->start($invocation->getMethod()->getName());
+        $span->setTag('method', $invocation->getMethod()->getName());
+        $span->log(['method' => $invocation->getMethod()->getName()]);
         $parameters = $invocation->getMethod()->getParameters();
         $array = array_values($invocation->getArguments()->getArrayCopy());
         try {
             foreach ($parameters as $k => $parameter) {
-                $span->getSpan()->setTag(
+                $span->setTag(
                     $parameter->getName(),
-                    serialize($array[$k])
+                    'test'
                 );
             }
             $result = $invocation->proceed();
 
         } catch (\Exception $e) {
-            $span->getSpan()->setTag('error', true);
-            $span->getSpan()->setTag('error.msg', $e->getMessage());
-            $span->getSpan()->setTag('error.code', $e->getCode());
-            $span->getSpan()->setTag('error.file', $e->getFile());
-            $span->getSpan()->setTag('error.line', $e->getLine());
-            $span->getSpan()->setTag('error.stack', $e->getTraceAsString());
+            $span->setTag('error', true);
+            $span->setTag('error.msg', $e->getMessage());
+            $span->setTag('error.code', $e->getCode());
+            $span->setTag('error.file', $e->getFile());
+            $span->setTag('error.line', $e->getLine());
+            $span->setTag('error.stack', $e->getTraceAsString());
+            $span->log($e->getTrace());
 
             throw $e;
         } finally {
-            $span->close();
+            $span->finish();
         }
 
         return $result;
