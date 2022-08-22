@@ -40,8 +40,6 @@ class TraceInterceptor extends AbstractLogger implements MethodInterceptor
             $span->log($e->getTrace());
 
             throw $e;
-        } finally {
-            $span->finish();
         }
 
         return $result;

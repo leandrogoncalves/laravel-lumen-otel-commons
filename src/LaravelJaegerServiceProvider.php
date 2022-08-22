@@ -19,6 +19,14 @@ use OpenTracing\GlobalTracer;
 class LaravelJaegerServiceProvider extends ServiceProvider
 {
 
+    public function register()
+    {
+        $configPath = __DIR__ . '/config/picpay-laravel-aop.php';
+        $this->mergeConfigFrom($configPath, 'picpay-laravel-aop');
+        $this->publishes([$configPath => config_path('picpay-laravel-aop.php')], 'aspect');
+
+    }
+
     public function boot(): void
     {
         $this->app->singleton(Jaeger::class, static function () {

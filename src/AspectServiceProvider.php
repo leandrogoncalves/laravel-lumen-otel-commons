@@ -33,9 +33,9 @@ class AspectServiceProvider extends LaravelJaegerServiceProvider
      */
     public function boot(): void
     {
-        $this->app['aspect.manager']->weave();
-
         parent::boot();
+
+        $this->app['aspect.manager']->weave();
     }
 
     /**
@@ -43,14 +43,11 @@ class AspectServiceProvider extends LaravelJaegerServiceProvider
      */
     public function register(): void
     {
-
-        $configPath = __DIR__ . '/config/ytake-laravel-aop.php';
-        $this->mergeConfigFrom($configPath, 'ytake-laravel-aop');
-        $this->publishes([$configPath => config_path('ytake-laravel-aop.php')], 'aspect');
+        parent::register();
 
         $this->app->singleton(AnnotationConfiguration::class, function ($app) {
             return new AnnotationConfiguration(
-                $app['config']->get('ytake-laravel-aop.annotation')
+                $app['config']->get('picpay-laravel-aop.annotation')
             );
         });
         $this->app->singleton('aspect.manager', function ($app) {
