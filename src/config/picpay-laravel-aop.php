@@ -59,14 +59,14 @@ return [
 
         'config' => [
             'sampler' => [
-                'type'  => \Jaeger\SAMPLER_TYPE_PROBABILISTIC,
-                'param' => env('JAEGER_SAMPLE_RATE', 0.1),
+                'type'  => \Jaeger\SAMPLER_TYPE_CONST,
+                'param' => env('JAEGER_SAMPLE_RATE', true),
             ],
             'local_agent' => [
                 'reporting_host' => env('JAEGER_HOST', 'jaeger'),
-                'reporting_port' => env('JAEGER_PORT', 5775),
+                'reporting_port' => env('JAEGER_PORT', 14268),
             ],
-            'dispatch_mode' => \Jaeger\Config::ZIPKIN_OVER_COMPACT_UDP,
+            'dispatch_mode' => \Jaeger\Config::JAEGER_OVER_BINARY_HTTP,
         ],
 
         'listeners' => [

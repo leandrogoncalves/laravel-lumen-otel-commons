@@ -18,11 +18,9 @@ final class QueryListener
 
     public function handle(QueryExecuted $event): void
     {
-        $this->jaeger->startStop("DB Query: {$event->sql}",  [
-            'query.sql'             => $event->sql,
-            'query.bindings'        => $event->bindings,
-            'query.connection_name' => $event->connectionName,
-            'query.time'            => $event->time
-        ], $event->time/1000);
+        $this->jaeger->startStop("DB Query: $event->sql", [
+            'query.sql' => $event->sql,
+            'query.time' => $event->time,
+        ], $event->time / 1000);
     }
 }
