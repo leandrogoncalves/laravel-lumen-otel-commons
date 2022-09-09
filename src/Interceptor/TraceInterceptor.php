@@ -2,6 +2,7 @@
 
 namespace Picpay\LaravelAspect\Interceptor;
 
+use OpenTracing\Span;
 use Picpay\LaravelAspect\Annotation\AnnotationReaderTrait;
 use Picpay\LaravelAspect\Jaeger;
 use Ray\Aop\MethodInterceptor;
@@ -18,6 +19,8 @@ class TraceInterceptor extends AbstractLogger implements MethodInterceptor
         $trace = app(Jaeger::class);
         $span = $trace->start($invocation->getMethod()->class.'::'.$invocation->getMethod()->getName());
         $span->setTag('method', $invocation->getMethod()->getName());
+        $span->setTag('kind', 'server');
+        $span->setTag('span.kind', 'server');
         $parameters = $invocation->getMethod()->getParameters();
         $array = array_values($invocation->getArguments()->getArrayCopy());
         try {
@@ -42,7 +45,12 @@ class TraceInterceptor extends AbstractLogger implements MethodInterceptor
             $span->log($invocation->getMethod()->getAttributes());
             $result = $invocation->proceed();
             $this->formatReturn($span, $result);
+            $span->setTag('otel.status_code', 'OK');
+            $span->setTag('Status', 'OK');
         } catch (\Exception $e) {
+            $span->setTag('Status', 'ERROR');
+            $span->setTag('otel.status_code', 'ERROR');
+            $span->setTag('otel.status_description', $e->getMessage());
             $span->setTag('error', true);
             $span->setTag('error.msg', $e->getMessage());
             $span->setTag('error.code', $e->getCode());
@@ -59,8 +67,8 @@ class TraceInterceptor extends AbstractLogger implements MethodInterceptor
         return $result;
     }
 
-    private function formatReturn($span, $return)
-    : void {
+    private function formatReturn(Span $span, mixed $return): void
+    {
         if (is_object($return)) {
             if (method_exists($return, 'toArray')) {
                 $span->setTag('method.return', json_encode($return->toArray()));

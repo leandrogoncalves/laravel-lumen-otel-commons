@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace Picpay\LaravelAspect;
 
+use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Route;
-use Closure;
+use Symfony\Component\HttpFoundation\Response;
+
+use function in_array;
 
 final class JaegerMiddleware
 {
@@ -19,21 +22,23 @@ final class JaegerMiddleware
     }
 
     /**
-     * @param Request $request
-     * @param Closure $next
+     * @param  Request  $request
+     * @param  Closure  $next
      * @return mixed
      */
-    public function handle($request, Closure $next)
-    {
+    public function handle(Request $request, Closure $next)
+    : mixed {
         $route = Route::getRoutes()->match($request);
-        
+
         if ($route->isFallback) {
             return $next($request);
         }
-
         $httpMethod = $request->method();
         $uri = $route->uri();
-
+        $deleteRoutes = config('picpay-laravel-aop.tracing.listeners.http.delete_routes') ?? [];
+        if (in_array($uri, $deleteRoutes)) {
+            return $next($request);
+        }
         $headers = [];
 
         foreach ($request->headers->all() as $key => $value) {
@@ -43,13 +48,27 @@ final class JaegerMiddleware
         $jaeger = $this->jaeger;
 
         $jaeger->initServerContext($headers);
-        $jaeger->start("$httpMethod: /$uri", [
+        $span = $jaeger->start("$httpMethod: /$uri", [
             'http.scheme' => $request->getScheme(),
             'http.ip_address' => $request->ip(),
             'http.host' => $request->getHost(),
             'laravel.version' => app()->version(),
+            'kind' => 'server',
+            'span.kind' => 'server',
         ]);
 
-        return $next($request);
+        /** @var Response $response */
+        $response = $next($request);
+        if ($response->isServerError() || $response->isClientError()) {
+            $span->setTag('Status', 'ERROR');
+            $span->setTag('otel.status_code', 'ERROR');
+            $span->setTag('otel.status_description', $response->getContent());
+            $span->setTag('error', true);
+        } else {
+            $span->setTag('otel.status_code', 'OK');
+            $span->setTag('Status', 'OK');
+        }
+
+        return $response;
     }
 }
