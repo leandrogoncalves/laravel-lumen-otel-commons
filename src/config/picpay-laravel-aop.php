@@ -73,6 +73,7 @@ return [
             'http' => [
                 'enabled' => env('JAEGER_HTTP_LISTENER_ENABLED', false),
                 'handler' => \Picpay\LaravelAspect\JaegerMiddleware::class,
+                'delete_routes' => []
             ],
             'console' => [
                 'enabled' => env('JAEGER_CONSOLE_LISTENER_ENABLED', false),
