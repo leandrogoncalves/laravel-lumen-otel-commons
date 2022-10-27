@@ -16,6 +16,13 @@ composer config picpay/laravel-otel-commons vcs https://github.com/PicPay/larave
 ```bash
 composer require picpay/laravel-otel-commons
 ```
+### Para Lumen
+Adicionar os 2 providers abaixo, no arquivo bootstrap/app.php
+
+```bash
+$app->register(Picpay\LaravelAspect\LumenAspectServiceProvider::class);
+$app->register(Picpay\LaravelAspect\ConsoleServiceProvider::class);
+```
 ### Publicando aspect module class
 
 ```bash
