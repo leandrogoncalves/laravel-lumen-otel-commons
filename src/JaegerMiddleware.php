@@ -36,7 +36,7 @@ final class JaegerMiddleware
             }
 
             $uri = $route->uri();
-        } catch (Throwable $e){
+        } catch (\Throwable $e){
             $uri = $request->getRequestUri();
         }
         $httpMethod = $request->method();
