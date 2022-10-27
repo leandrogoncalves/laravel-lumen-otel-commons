@@ -28,13 +28,19 @@ final class JaegerMiddleware
      */
     public function handle(Request $request, Closure $next)
     : mixed {
-        $route = Route::getRoutes()->match($request);
+        try {
+            $route = Route::getRoutes()->match($request);
 
-        if ($route->isFallback) {
-            return $next($request);
+            if ($route->isFallback) {
+                return $next($request);
+            }
+
+            $uri = $route->uri();
+        } catch (Throwable $e){
+            $uri = $request->getRequestUri();
         }
         $httpMethod = $request->method();
-        $uri = $route->uri();
+        
         $deleteRoutes = config('picpay-laravel-aop.tracing.listeners.http.delete_routes') ?? [];
         if (in_array($uri, $deleteRoutes)) {
             return $next($request);
