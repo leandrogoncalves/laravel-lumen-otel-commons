@@ -74,14 +74,14 @@ class LumenAspectServiceProvider extends ServiceProvider
             $client = GlobalTracer::get();
 
             return new Jaeger($client);
-        });
-
-        app(Jaeger::class)->finish();
+        });      
 
         $this->initHttp();
         $this->initConsole();
         $this->initQuery();
         $this->initJob();
+        
+        app(Jaeger::class)->finish();
     }
 
     private function initHttp(): void
