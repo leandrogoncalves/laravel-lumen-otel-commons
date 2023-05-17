@@ -33,8 +33,7 @@
     "doctrine/annotations": "^1.11",
     "nikic/php-parser": "^4.0",
     "psr/log": "~1.0",
-    "jonahgeorge/jaeger-client-php": "^1.4",
-    "laravel/framework": "^9.0"
+    "jonahgeorge/jaeger-client-php": "^1.4"
   },
   "require-dev": {
     "symfony/framework-bundle": "^5.2",
